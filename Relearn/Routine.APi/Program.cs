@@ -22,6 +22,7 @@ namespace Routine.APi
             {
                 try
                 {
+                    // delete the db and re set db
                     var dbContext = scope.ServiceProvider.GetService<RoutineDbContext>();
                     dbContext.Database.EnsureDeleted();
                     dbContext.Database.Migrate();

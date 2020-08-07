@@ -106,6 +106,8 @@ D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine
 D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\obj\Debug\netcoreapp3.0\Routine.APi.dll
 D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\obj\Debug\netcoreapp3.0\Routine.APi.pdb
 D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\obj\Debug\netcoreapp3.0\Routine.APi.genruntimeconfig.cache
+D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\bin\Debug\netcoreapp3.0\Microsoft.EntityFrameworkCore.Design.dll
+D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\bin\Debug\netcoreapp3.0\AutoMapper.dll
+D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\bin\Debug\netcoreapp3.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\obj\Debug\netcoreapp3.0\Routine.APi.csproj.CoreCompileInputs.cache
 D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\obj\Debug\netcoreapp3.0\Routine.APi.MvcApplicationPartsAssemblyInfo.cache
-D:\source\TeacherYangRestfulApiCourse\eacherYangRestfulApiCourse\Relearn\Routine.APi\bin\Debug\netcoreapp3.0\Microsoft.EntityFrameworkCore.Design.dll

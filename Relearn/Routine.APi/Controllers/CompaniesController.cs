@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Server.IIS.Core;
 using Routine.APi.Services;
+using AutoMapper;
+using Routine.APi.Models;
 
 namespace Routine.APi.Controllers
 {
@@ -57,11 +61,13 @@ namespace Routine.APi.Controllers
          * 5.错误状态代码的问题详细信息
          */
         private readonly ICompanyRepository _companyRepository;
+        private readonly IMapper _mapper;
 
-        public CompaniesController(ICompanyRepository companyRepository)
+        public CompaniesController(ICompanyRepository companyRepository, IMapper mapper)
         {
             _companyRepository = companyRepository
                                  ?? throw new ArgumentNullException(nameof(companyRepository));
+            _mapper = mapper ?? throw new ArgumentOutOfRangeException(nameof(mapper));
         }
 
         [HttpGet]
@@ -69,7 +75,21 @@ namespace Routine.APi.Controllers
         {
             var companies = 
                 await _companyRepository.GetCompaniesAsync();
-            return Ok(companies);
+            //not using automapper
+            //var companyDtos = new List<CompanyDto>();
+            //foreach (var company in companies)
+            //{
+            //    companyDtos.Add(
+            //        new CompanyDto
+            //        {
+            //            Id = company.Id,
+            //            Name = company.Name
+            //        });
+            //}
+            //using automapper
+            var companyDtos = _mapper.Map<IEnumerable<CompanyDto>>(companies);
+            
+            return Ok(companyDtos);
         }
 
         [HttpGet("{companyId}")] //or [Route("{companyId}")] api/Companies/{companyId}
@@ -92,7 +112,7 @@ namespace Routine.APi.Controllers
                 return NotFound();
             }
 
-            return Ok(company);
+            return Ok(_mapper.Map<CompanyDto>(company));
         }
     }
 }
