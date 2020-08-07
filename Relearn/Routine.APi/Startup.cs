@@ -30,15 +30,18 @@ namespace Routine.APi
             services.AddControllers(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
-                options.OutputFormatters.Add(
-                    new XmlDataContractSerializerOutputFormatter());
-            });
+                //options.OutputFormatters.Add(
+                    //new XmlDataContractSerializerOutputFormatter());
+                // options.OutputFormatters.Insert(0, new XmlDataContractSerializerOutputFormatter());
+            }).AddXmlDataContractSerializerFormatters();
 
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddDbContext<RoutineDbContext>(options =>
             {
-                options.UseSqlServer("Data Source=localhost;DataBase=routine;Integrated Security=SSPI");
-            });
+                var connectionString =
+                    "Data Source = (localdb)\\MSSQLLocalDB; DataBase = routine; Integrated Security = SSPI";
+                options.UseSqlServer(connectionString);
+              });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

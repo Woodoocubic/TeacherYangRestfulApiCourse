@@ -45,6 +45,7 @@ namespace Routine.APi.Controllers
      */
     [ApiController]
     [Route("api/companies")]
+    //[Route("api/[controller]")]
     public class CompaniesController: ControllerBase
     {
         /*[ApiController]属性并不是强制要求的，但是它会使开发体验更好
@@ -71,7 +72,7 @@ namespace Routine.APi.Controllers
             return Ok(companies);
         }
 
-        [HttpGet("{companyId}")] //or [Route("{companyId}")]
+        [HttpGet("{companyId}")] //or [Route("{companyId}")] api/Companies/{companyId}
         public async Task<IActionResult> GetCompany(Guid companyId)
         {
             //not good for high 并发
