@@ -51,10 +51,7 @@ namespace Routine.APi.Controllers
                 var employeeDto = _mapper.Map<EmployeeDto>(employee);
                 return Ok(employeeDto);
             }
-            else
-            {
-                return NotFound();
-            }
+            return NotFound();
         }
     }
 }

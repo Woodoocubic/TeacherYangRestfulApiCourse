@@ -72,6 +72,7 @@ namespace Routine.APi.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetCompanies()
+        //public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies()
         {
             var companies = 
                 await _companyRepository.GetCompaniesAsync();
