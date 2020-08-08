@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Server.IIS.Core;
 using Routine.APi.Services;
 using AutoMapper;
+using Routine.APi.DtoParameters;
 using Routine.APi.Models;
 
 namespace Routine.APi.Controllers
@@ -71,23 +72,13 @@ namespace Routine.APi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCompanies()
+        [HttpHead]
+        public async Task<IActionResult> GetCompanies([FromQuery] CompanyDtoParameters parameters)
         //public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies()
         {
             var companies = 
-                await _companyRepository.GetCompaniesAsync();
-            //not using automapper
-            //var companyDtos = new List<CompanyDto>();
-            //foreach (var company in companies)
-            //{
-            //    companyDtos.Add(
-            //        new CompanyDto
-            //        {
-            //            Id = company.Id,
-            //            Name = company.Name
-            //        });
-            //}
-            //using automapper
+                await _companyRepository.GetCompaniesAsync(parameters);
+
             var companyDtos = _mapper.Map<IEnumerable<CompanyDto>>(companies);
             
             return Ok(companyDtos);

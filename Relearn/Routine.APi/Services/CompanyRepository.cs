@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Routine.APi.Data;
+using Routine.APi.DtoParameters;
 using Routine.APi.Entities;
 
 namespace Routine.APi.Services
@@ -84,9 +85,28 @@ namespace Routine.APi.Services
             return await _context.Companies.FirstOrDefaultAsync(x => x.Id == companyId);
         }
 
-        public async Task<IEnumerable<Company>> GetCompaniesAsync()
+        public async Task<IEnumerable<Company>> GetCompaniesAsync(CompanyDtoParameters parameters)
         {
-            return await _context.Companies.ToListAsync();
+            if (parameters == null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            var queryExpression = _context.Companies as IQueryable<Company>;
+            if (!string.IsNullOrWhiteSpace(parameters.Name))
+            {
+                parameters.Name = parameters.Name.Trim();
+                queryExpression = queryExpression.Where(x => x.Name == parameters.Name);
+            }
+
+            if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+            {
+                parameters.SearchTerm = parameters.Name.Trim();
+                queryExpression = queryExpression.Where(x => x.Name.Contains(parameters.SearchTerm)
+                                                             || x.Introduction.Contains(parameters.SearchTerm));
+            }
+
+            return await queryExpression.ToListAsync();
         }
 
         public async Task<IEnumerable<Company>> GetCompaniesAsync(IEnumerable<Guid> companyIds)
@@ -119,17 +139,35 @@ namespace Routine.APi.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId)
+        public async Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId,
+            string genderDisplay, string q)
         {
             if (companyId == Guid.Empty)
             {
                 throw new ArgumentNullException(nameof(companyId));
             }
 
-            return await _context.Employees
-                .Where(x => x.CompanyId == companyId)
-                .OrderBy(x => x.EmployeeNo)
-                .ToListAsync();
+            var items = _context.Employees.Where(x => x.CompanyId == companyId);
+            if (!string.IsNullOrWhiteSpace(genderDisplay))
+            {
+                genderDisplay = genderDisplay.Trim();
+                var gender = Enum.Parse<Gender>(genderDisplay);
+                items = items.Where(x => x.Gender == gender);
+            }
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.Trim();
+                items = items.Where(x => x.EmployeeNo.Contains(q)
+                                         || x.FirstName.Contains(q)
+                                         || x.LastName.Contains(q));
+            }
+
+            return await items.OrderBy(x => x.EmployeeNo).ToListAsync();
+            //return await _context.Employees
+            //    .Where(x => x.CompanyId == companyId)
+            //    .OrderBy(x => x.EmployeeNo)
+            //    .ToListAsync();
         }
 
         public void UpdateCompany(Company company)

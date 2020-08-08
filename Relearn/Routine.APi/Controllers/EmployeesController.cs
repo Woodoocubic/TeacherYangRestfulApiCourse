@@ -23,11 +23,12 @@ namespace Routine.APi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetEmployeesForCompany(Guid companyId)
+        public async Task<IActionResult> GetEmployeesForCompany(Guid companyId,
+            [FromQuery(Name = "gender")] string genderDisplay, [FromQuery] string q)
         {
             if (await _companyRepository.CompanyExistAsync(companyId))
             {
-                var employees = await _companyRepository.GetEmployeesAsync(companyId);
+                var employees = await _companyRepository.GetEmployeesAsync(companyId, genderDisplay, q);
                 var employDtos = _mapper.Map<IEnumerable<EmployeeDto>>(employees);
                 return Ok(employDtos);
             }
@@ -38,7 +39,7 @@ namespace Routine.APi.Controllers
         }
 
         [HttpGet("{employeeId}")]
-        public async Task<IActionResult> GetEmployeesForCompany(Guid companyId, Guid employeeId)
+        public async Task<ActionResult<EmployeeDto>> GetEmployeesForCompany(Guid companyId, Guid employeeId)
         {
             if (await _companyRepository.CompanyExistAsync(companyId))
             {
