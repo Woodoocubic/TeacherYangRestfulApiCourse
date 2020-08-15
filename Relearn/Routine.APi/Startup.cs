@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Routine.APi.Data;
 using Routine.APi.Services;
 using AutoMapper;
+using Newtonsoft.Json;
 
 namespace Routine.APi
 {
@@ -30,14 +31,23 @@ namespace Routine.APi
         {
             // Accept Header for output formatters
             // content-type header for input formatters
+            //services.AddControllers(options =>
+            //{
+            //    // set 406 code
+            //    options.ReturnHttpNotAcceptable = true;
+            //    //options.OutputFormatters.Add(
+            //        //new XmlDataContractSerializerOutputFormatter());
+            //    // options.OutputFormatters.Insert(0, new XmlDataContractSerializerOutputFormatter());
+            //}).AddXmlDataContractSerializerFormatters();
+            // new way to write AddXmlDataContractSerializerFormatters()
             services.AddControllers(options =>
             {
-                // set 406 code
+                // 406 state code
                 options.ReturnHttpNotAcceptable = true;
-                //options.OutputFormatters.Add(
-                    //new XmlDataContractSerializerOutputFormatter());
-                // options.OutputFormatters.Insert(0, new XmlDataContractSerializerOutputFormatter());
-            }).AddXmlDataContractSerializerFormatters();
+            }).AddNewtonsoftJson(
+            {
+
+            });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

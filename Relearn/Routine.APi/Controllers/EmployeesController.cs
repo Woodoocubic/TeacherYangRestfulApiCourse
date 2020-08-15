@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Routine.APi.Entities;
 using Routine.APi.Models;
 using Routine.APi.Services;
 
@@ -15,6 +16,7 @@ namespace Routine.APi.Controllers
     {
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
+        private readonly IPropertyMappingService 
 
         public EmployeesController(ICompanyRepository companyRepository, IMapper mapper)
         {
@@ -38,8 +40,8 @@ namespace Routine.APi.Controllers
             }
         }
 
-        [HttpGet("{employeeId}")]
-        public async Task<ActionResult<EmployeeDto>> GetEmployeesForCompany(Guid companyId, Guid employeeId)
+        [HttpGet("{employeeId}", Name = nameof(GetEmployeeForCompany))]
+        public async Task<ActionResult<EmployeeDto>> GetEmployeeForCompany(Guid companyId, Guid employeeId)
         {
             if (await _companyRepository.CompanyExistAsync(companyId))
             {
@@ -53,6 +55,25 @@ namespace Routine.APi.Controllers
                 return Ok(employeeDto);
             }
             return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<EmployeeDto>> CreateEmployeeForCompany([FromRoute] Guid companyId, 
+            [FromBody] EmployeeAddDto employee)
+        {
+            if (! await _companyRepository.CompanyExistAsync(companyId))
+            {
+                return NotFound();
+            }
+
+            var entity = _mapper.Map<Employee>(employee);
+            _companyRepository.AddEmployee(companyId, entity);
+            await _companyRepository.SaveAsync();
+            var returnDto = _mapper.Map<EmployeeDto>(entity);
+
+            return CreatedAtRoute(nameof(GetEmployeeForCompany),
+                new {companyId = returnDto.CompanyId, employeeId = returnDto.Id},
+                returnDto);
         }
     }
 }

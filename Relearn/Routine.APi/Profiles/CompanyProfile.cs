@@ -22,6 +22,7 @@ namespace Routine.APi.Profiles
             //    .ForMember(dest => dest.Name,
             //        opt => opt.MapFrom(
             //            src => src.Name));
+            CreateMap<CompanyAddDto, Company>();
         }
     }
 }

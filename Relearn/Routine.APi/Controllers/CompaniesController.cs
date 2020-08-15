@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Server.IIS.Core;
 using Routine.APi.Services;
 using AutoMapper;
 using Routine.APi.DtoParameters;
+using Routine.APi.Entities;
 using Routine.APi.Models;
 
 namespace Routine.APi.Controllers
@@ -84,7 +85,7 @@ namespace Routine.APi.Controllers
             return Ok(companyDtos);
         }
 
-        [HttpGet("{companyId}")] //or [Route("{companyId}")] api/Companies/{companyId}
+        [HttpGet("{companyId}", Name = nameof(GetCompany))] //or [Route("{companyId}")] api/Companies/{companyId}
         public async Task<IActionResult> GetCompany(Guid companyId)
         {
             //not good for high 并发
@@ -105,6 +106,27 @@ namespace Routine.APi.Controllers
             }
 
             return Ok(_mapper.Map<CompanyDto>(company));
+        }
+        
+        //Task<IActionResult> = Task<ActionResult<CompanyDto>>
+        [HttpPost]
+        public async Task<IActionResult> CreateCompany(
+            [FromBody] CompanyAddDto company)
+        {
+            // old version should use:
+            // ApiController attribute, no need for check
+            //if (company == null)
+            //{
+            //    return BadRequest();
+            //}
+            var entity = _mapper.Map<Company>(company);
+            _companyRepository.AddCompany(entity);
+            await _companyRepository.SaveAsync();
+            var retrunDto = _mapper.Map<CompanyDto>(entity);
+            //return 201
+            //using CreateAtRoute  return the header add the Location
+            return CreatedAtRoute(nameof(GetCompany), new {companyId = retrunDto.Id}, 
+                retrunDto); 
         }
     }
 }
