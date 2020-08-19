@@ -116,7 +116,7 @@ namespace Routine.APi.Controllers
             // old version should use:
             // ApiController attribute, no need for check
             //if (company == null)
-            //{
+            //{ 
             //    return BadRequest();
             //}
             var entity = _mapper.Map<Company>(company);
@@ -127,6 +127,13 @@ namespace Routine.APi.Controllers
             //using CreateAtRoute  return the header add the Location
             return CreatedAtRoute(nameof(GetCompany), new {companyId = retrunDto.Id}, 
                 retrunDto); 
+        }
+
+        [HttpOptions]
+        public IActionResult GetCompaniesOptions()
+        {
+            Response.Headers.Add("Allow", "DELETE, GET, PATCH, PUT, OPTIONS");
+            return Ok();
         }
     }
 }

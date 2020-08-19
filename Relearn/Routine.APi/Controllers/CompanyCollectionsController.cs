@@ -6,6 +6,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.SignalR;
+using Routine.APi.Entities;
+using Routine.APi.Helpers;
 using Routine.APi.Models;
 using Routine.APi.Services;
 
@@ -25,8 +27,9 @@ namespace Routine.APi.Controllers
                                  throw new ArgumentNullException(nameof(companyRepository));
         }
 
-        [HttpGet("{ids}", Name = nameof(GetCompanyCollection))]
-        public async Task<IActionResult> GetCompanyCollection([FromRoute]
+        [HttpGet("({ids})", Name = nameof(GetCompanyCollection))]
+        public async Task<IActionResult> GetCompanyCollection(
+            [FromRoute]
             [ModelBinder(BinderType = typeof(ArrayModelBinder))]
             IEnumerable<Guid> ids)
         {
@@ -35,15 +38,37 @@ namespace Routine.APi.Controllers
                 return BadRequest();
             }
 
-            var entities = await _companyRepository.GetCompaniesAsync(ids);
+            var entities 
+                = await _companyRepository.GetCompaniesAsync(ids);
 
             if (ids.Count() != entities.Count())
-            {
+            { 
                 return NotFound();
             }
 
-            var dtosToReturn = _mapper.Map<IEnumerable<CompanyDto>>(entities);
+            var dtosToReturn = _mapper
+                .Map<IEnumerable<CompanyDto>>(entities);
             return Ok(dtosToReturn);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<IEnumerable<CompanyDto>>> CreateCompanyCollection(
+            IEnumerable<CompanyAddDto> companyCollection)
+        {
+            // need valide employees 
+            var companyEntities = _mapper.Map<IEnumerable<Company>>(companyCollection);
+            foreach (var company in companyEntities)
+            {
+                _companyRepository.AddCompany(company);
+            }
+
+            await _companyRepository.SaveAsync();
+            var dtosToReturn = _mapper
+                .Map<IEnumerable<CompanyDto>>(companyEntities);
+            var idsString = string.Join(",", 
+                dtosToReturn.Select(x => x.Id));
+            return CreatedAtRoute(nameof(GetCompanyCollection), 
+                new {ids = idsString}, dtosToReturn);
         }
     }
 }

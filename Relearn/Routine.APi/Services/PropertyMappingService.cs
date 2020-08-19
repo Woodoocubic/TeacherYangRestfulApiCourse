@@ -34,6 +34,11 @@ namespace Routine.APi.Services
             {"Age", new PropertyMappingValue(new List<string>{"DateOfBirth"}, true)}
         };
         //reflection relation list
-        private IList<IPropertyMapping>
+        private IList<IPropertyMapping> _propertyMappings = new List<IPropertyMapping>();
+
+        public PropertyMappingService()
+        {
+
+        }
     }
 }
