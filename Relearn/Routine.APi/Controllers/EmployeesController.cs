@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Routine.APi.Entities;
 using Routine.APi.Models;
 using Routine.APi.Services;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Routine.APi.Controllers
 {
@@ -16,7 +21,7 @@ namespace Routine.APi.Controllers
     {
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
-        private readonly IPropertyMappingService 
+        //private IPropertyMappingService;
 
         public EmployeesController(ICompanyRepository companyRepository, IMapper mapper)
         {
@@ -75,5 +80,122 @@ namespace Routine.APi.Controllers
                 new {companyId = returnDto.CompanyId, employeeId = returnDto.Id},
                 returnDto);
         }
+
+        [HttpPut("{employeeId}")]
+        public async Task<ActionResult<EmployeeDto>> UpdateEmployeeForCompany(
+            Guid companyId,
+            Guid employeeId,
+            EmployeeUpdateDto employee)
+        {
+            if (! await  _companyRepository.CompanyExistAsync(companyId))
+            {
+                return NotFound();
+            }
+
+            var employeeEntity = await _companyRepository.GetEmployeeAsync(companyId, employeeId);
+            if (employeeEntity == null)
+            {
+                // not allow client side for Guid
+                //return NotFound();
+
+                //allow client side for Guid
+                var employeeToAddEntity = _mapper.Map<Employee>(employee);
+                employeeToAddEntity.Id = employeeId;
+                _companyRepository.AddEmployee(companyId, employeeToAddEntity);
+                await _companyRepository.SaveAsync();
+                var returnDto = _mapper.Map<EmployeeDto>(employeeToAddEntity);
+                return CreatedAtRoute(nameof(GetEmployeeForCompany),
+                    new {companyId = companyId, employeeId = employeeId},
+                    returnDto);
+            }
+            // updateDto to entity
+            _mapper.Map(employee, employeeEntity);
+            _companyRepository.UpdateEmployee(employeeEntity);
+            await _companyRepository.SaveAsync();
+            return NoContent();
+        }
+
+        [HttpPatch("{employeeId}")]
+        public async Task<IActionResult> PartiallyUpdateEmployeeForCompany(
+            Guid companyId,
+            Guid employeeId,
+            JsonPatchDocument<EmployeeUpdateDto> patchDocument)
+        {
+            if ( ! await  _companyRepository.CompanyExistAsync(companyId))
+            {
+                return NotFound();
+            }
+
+            var employeeEntity = await _companyRepository.GetEmployeeAsync(companyId, employeeId);
+            if (employeeEntity == null)
+            {
+                //not allow client side Guid;
+                //return NotFound();
+
+                //allow client side Guid 
+                var employeeDto = new EmployeeUpdateDto();
+                //send to ModelState AND Validate
+                patchDocument.ApplyTo(employeeDto, ModelState);
+                if (!TryValidateModel(employeeDto))
+                {
+                    return ValidationProblem(ModelState);
+                }
+
+                var employeeToAdd = _mapper.Map<Employee>(employeeDto);
+                employeeToAdd.Id = employeeId;
+                _companyRepository.AddEmployee(companyId, employeeToAdd);
+                await _companyRepository.SaveAsync();
+                var dtoToReturn = _mapper.Map<Employee>(employeeToAdd);
+
+                return CreatedAtRoute(nameof(GetEmployeeForCompany),
+                    new {companyId = companyId, employeeId = employeeId},
+                    dtoToReturn);
+            }
+
+            var dtoToPatch = _mapper.Map<EmployeeUpdateDto>(employeeEntity);
+            
+            // need validation
+            patchDocument.ApplyTo(dtoToPatch);
+            if (!TryValidateModel(dtoToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            _mapper.Map(dtoToPatch, employeeEntity);
+            _companyRepository.UpdateEmployee(employeeEntity);
+            await _companyRepository.SaveAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{employeeId}")]
+        public async Task<IActionResult> DeleteEmployeeForCompany(Guid companyId, Guid employeeId)
+        {
+            if (!await _companyRepository.CompanyExistAsync(companyId))
+            {
+                return NotFound();
+            }
+
+            var employeeEntity = await _companyRepository.GetEmployeeAsync(companyId, employeeId);
+            if (employeeEntity == null)
+            {
+                return NotFound();
+            }
+
+            _companyRepository.DeleteEmployee(employeeEntity);
+
+            await _companyRepository.SaveAsync();
+            return NoContent();
+        }
+
+        public override ActionResult ValidationProblem(ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices
+                .GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult) options.Value.InvalidModelStateResponseFactory(ControllerContext);
+        }
     }
+
+
+
+
 }

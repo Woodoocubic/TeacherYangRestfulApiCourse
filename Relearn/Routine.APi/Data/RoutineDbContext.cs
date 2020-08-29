@@ -36,7 +36,7 @@ namespace Routine.APi.Data
                 .WithMany(x => x.Employees)
                 //fk
                 .HasForeignKey(x => x.CompanyId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
             //seeding data
             modelBuilder.Entity<Company>().HasData(
                 new Company

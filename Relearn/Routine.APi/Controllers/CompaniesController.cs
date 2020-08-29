@@ -129,6 +129,23 @@ namespace Routine.APi.Controllers
                 retrunDto); 
         }
 
+        [HttpDelete("{companyId}")]
+        public async Task<IActionResult> DeleteCompany(Guid companyId)
+        {
+            var companyEntity = await _companyRepository.GetCompanyAsync(companyId);
+            if (companyEntity == null)
+            {
+                return NotFound();
+            }
+
+            await _companyRepository.GetEmployeesAsync(companyId, null, null);
+            
+            _companyRepository.DeleteCompany(companyEntity);
+            await _companyRepository.SaveAsync();
+
+            return NoContent();
+        }
+
         [HttpOptions]
         public IActionResult GetCompaniesOptions()
         {

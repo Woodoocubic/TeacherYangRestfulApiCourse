@@ -1,4 +1,4 @@
-using System;
+ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,7 +14,8 @@ using Microsoft.Extensions.Options;
 using Routine.APi.Data;
 using Routine.APi.Services;
 using AutoMapper;
-using Newtonsoft.Json;
+ using Microsoft.AspNetCore.Mvc;
+ using Newtonsoft.Json.Serialization;
 
 namespace Routine.APi
 {
@@ -41,13 +42,35 @@ namespace Routine.APi
             //}).AddXmlDataContractSerializerFormatters();
             // new way to write AddXmlDataContractSerializerFormatters()
             services.AddControllers(options =>
-            {
-                // 406 state code
-                options.ReturnHttpNotAcceptable = true;
-            }).AddNewtonsoftJson(
-            {
-
-            });
+                {
+                    // 406 state code
+                    options.ReturnHttpNotAcceptable = true;
+                })
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ContractResolver =
+                        new CamelCasePropertyNamesContractResolver();
+                })
+                .AddXmlDataContractSerializerFormatters()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = context =>
+                    {
+                        var problemDetails = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Type = "http.//www.baidu.com",
+                            Title = "you have a problem",
+                            Status = StatusCodes.Status422UnprocessableEntity,
+                            Detail = "please check the detail document",
+                            Instance = context.HttpContext.Request.Path
+                        };
+                        problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+                        return new UnprocessableEntityObjectResult(problemDetails)
+                        {
+                            ContentTypes = {"application/problem+json"}
+                        };
+                    }; 
+                });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

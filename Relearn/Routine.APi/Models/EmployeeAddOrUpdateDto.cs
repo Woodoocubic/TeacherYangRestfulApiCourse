@@ -38,5 +38,5 @@ namespace Routine.APi.Models
                 yield return new ValidationResult("First name and last name must not same", new []{ nameof(LastName), nameof(FirstName)});
             }
         }
-    }
+    } 
 }

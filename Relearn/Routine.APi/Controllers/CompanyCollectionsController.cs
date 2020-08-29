@@ -26,7 +26,7 @@ namespace Routine.APi.Controllers
             _companyRepository = companyRepository ??
                                  throw new ArgumentNullException(nameof(companyRepository));
         }
-
+        // 1,2,3,4
         [HttpGet("({ids})", Name = nameof(GetCompanyCollection))]
         public async Task<IActionResult> GetCompanyCollection(
             [FromRoute]
