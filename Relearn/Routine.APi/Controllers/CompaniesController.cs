@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Server.IIS.Core;
-using Routine.APi.Services;
-using AutoMapper;
 using Routine.APi.DtoParameters;
 using Routine.APi.Entities;
+using Routine.APi.Helpers;
 using Routine.APi.Models;
+using Routine.APi.Services;
+using System;
+using System.Collections.Generic;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Routine.APi.Controllers
 {
@@ -72,7 +72,7 @@ namespace Routine.APi.Controllers
             _mapper = mapper ?? throw new ArgumentOutOfRangeException(nameof(mapper));
         }
 
-        [HttpGet]
+        [HttpGet(Name = nameof(GetCompanies))]
         [HttpHead]
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyDtoParameters parameters)
         //public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies()
@@ -80,6 +80,31 @@ namespace Routine.APi.Controllers
             var companies = 
                 await _companyRepository.GetCompaniesAsync(parameters);
 
+            var previousPageLink = companies.HasPrevious
+                ? CreateCompaniesResourceUri(parameters, ResourceUriType.PreviousPage)
+                : null;
+
+            var nextPageLink = companies.HasNext
+                ? CreateCompaniesResourceUri(parameters, ResourceUriType.NextPage)
+                : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = companies.TotalCount,
+                pageSize = companies.PageSize,
+                currentPage = companies.CurrentPage,
+                totalPage = companies.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+            Response.Headers.Add("X-Pagination", JsonSerializer
+                .Serialize(
+                paginationMetadata, 
+                new JsonSerializerOptions
+                {
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                }));
+                
             var companyDtos = _mapper.Map<IEnumerable<CompanyDto>>(companies);
             
             return Ok(companyDtos);
@@ -151,6 +176,43 @@ namespace Routine.APi.Controllers
         {
             Response.Headers.Add("Allow", "DELETE, GET, PATCH, PUT, OPTIONS");
             return Ok();
+        }
+
+        private string CreateCompaniesResourceUri(CompanyDtoParameters parameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link(
+                        nameof(GetCompanies),
+                        new
+                        {
+                             pageNumber = parameters.PageNumber-1,
+                             pageSize = parameters.PageSize,
+                             companyName = parameters.CompanyName,
+                             searchTerm = parameters.SearchTerm
+                        });
+                case ResourceUriType.NextPage:
+                    return Url.Link(
+                        nameof(GetCompanies),
+                        new
+                        {
+                            pageNumber = parameters.PageNumber+1,
+                            pageSize = parameters.PageSize,
+                            companyName = parameters.CompanyName,
+                            searchTerm = parameters.SearchTerm
+                        });
+                default:
+                    return Url.Link(nameof(GetCompanies),
+                        new
+                        {
+                            pageNumber = parameters.PageNumber,
+                            pageSize = parameters.PageSize,
+                            companyName = parameters.CompanyName,
+                            searchTerm = parameters.SearchTerm
+                        });
+            }
         }
     }
 }
