@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Routine.APi.DtoParameters;
 
 namespace Routine.APi.Controllers
 {
@@ -21,23 +22,34 @@ namespace Routine.APi.Controllers
     {
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
-        //private IPropertyMappingService;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public EmployeesController(ICompanyRepository companyRepository, IMapper mapper)
+        public EmployeesController(ICompanyRepository companyRepository, 
+            IMapper mapper, 
+            IPropertyMappingService propertyMappingService)
         {
             _companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _propertyMappingService =
+                propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetEmployeesForCompany(Guid companyId,
-            [FromQuery(Name = "gender")] string genderDisplay, [FromQuery] string q)
+        public async Task<IActionResult> GetEmployeesForCompany(
+            Guid companyId,
+            [FromQuery]EmployeeDtoParameters parameters )
         {
+            //validate iquery string 's orderby 
+            if (! _propertyMappingService.ValidMappingExistsFor<CompanyDto, Company>(parameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             if (await _companyRepository.CompanyExistAsync(companyId))
             {
-                var employees = await _companyRepository.GetEmployeesAsync(companyId, genderDisplay, q);
-                var employDtos = _mapper.Map<IEnumerable<EmployeeDto>>(employees);
-                return Ok(employDtos);
+                var employees = await _companyRepository.GetEmployeesAsync(companyId, parameters);
+                var employeeDtos = _mapper.Map<IEnumerable<EmployeeDto>>(employees);
+                return Ok(employeeDtos);
             }
             else
             {
@@ -46,7 +58,9 @@ namespace Routine.APi.Controllers
         }
 
         [HttpGet("{employeeId}", Name = nameof(GetEmployeeForCompany))]
-        public async Task<ActionResult<EmployeeDto>> GetEmployeeForCompany(Guid companyId, Guid employeeId)
+        public async Task<ActionResult<EmployeeDto>> 
+            GetEmployeeForCompany(Guid companyId, 
+                Guid employeeId)
         {
             if (await _companyRepository.CompanyExistAsync(companyId))
             {

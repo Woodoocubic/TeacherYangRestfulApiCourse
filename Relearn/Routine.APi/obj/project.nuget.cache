@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "30OD2rPeQiHNKQdB01xsXdxYlyar6S6m4nVM8X/4Rw50D2zq/nQxIGQoImaNbpm6UZz96Cqb6MpMutKbpS2DRw==",
+  "dgSpecHash": "x113ceWYscXBK2ORH0HlxW2eVHjjcXO61W1gpy04HiuZ+t+nOxD/VYQnlmPJYB3V34MyTehZC9AQyFkwW7Ea3Q==",
   "success": true,
   "projectFilePath": "D:\\source\\TeacherYangRestfulApiCourse\\eacherYangRestfulApiCourse\\Relearn\\Routine.APi\\Routine.APi.csproj",
   "expectedPackageFiles": [
@@ -61,6 +61,7 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.io.filesystem\\4.3.0\\system.io.filesystem.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.io.filesystem.primitives\\4.3.0\\system.io.filesystem.primitives.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.linq\\4.3.0\\system.linq.4.3.0.nupkg.sha512",
+    "C:\\Users\\Greg\\.nuget\\packages\\system.linq.dynamic.core\\1.2.2\\system.linq.dynamic.core.1.2.2.nupkg.sha512",
     "C:\\Users\\Greg\\.nuget\\packages\\system.memory\\4.5.2\\system.memory.4.5.2.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.net.nameresolution\\4.3.0\\system.net.nameresolution.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.net.primitives\\4.3.0\\system.net.primitives.4.3.0.nupkg.sha512",

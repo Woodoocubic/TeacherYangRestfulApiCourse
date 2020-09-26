@@ -81,6 +81,8 @@ namespace Routine.APi
                     "Data Source = (localdb)\\MSSQLLocalDB; DataBase = routine; Integrated Security = SSPI";
                 options.UseSqlServer(connectionString);
               });
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+            services.AddTransient<IPropertyCheckerService, PropertyCheckerService>();
         }
         // router middle wares 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

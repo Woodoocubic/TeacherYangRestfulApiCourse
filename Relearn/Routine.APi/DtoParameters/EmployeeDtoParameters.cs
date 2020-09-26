@@ -10,7 +10,7 @@ namespace Routine.APi.DtoParameters
         private const int MaxPageSize = 20;
         public string Gender { get; set; }
         public string Q { get; set; }
-        public int PageNumber { get; set; }
+        public int PageNumber { get; set; } = 1;
         
         private int _pageSize = 5;
 

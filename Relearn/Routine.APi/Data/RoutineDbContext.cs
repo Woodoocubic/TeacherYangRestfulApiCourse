@@ -43,19 +43,100 @@ namespace Routine.APi.Data
                 {
                     Id = Guid.Parse("C0E917F9-1640-4FFD-8DFE-D3946913A180"),
                     Name = "Microsoft",
+                    Country = "USA",
+                    Industry = "Internet",
+                    Product = "Software",
                     Introduction = "Great Company"
                 },
                 new Company
                 {
                     Id = Guid.Parse("543D0978-084E-43F5-82F8-6417FFCE0C0C"),
                     Name = "Google",
-                    Introduction = "Don't be evil",
+                    Country = "USA",
+                    Industry = "Internet",
+                    Product = "Software",
+                    Introduction = "Don't be evil"
                 },
                 new Company
                 {
                     Id = Guid.Parse("50817877-F6F8-4161-9926-20817AC3BD08"),
                     Name = "Alipapa",
-                    Introduction = "fubao Company",
+                    Country = "CN",
+                    Industry = "Internet",
+                    Product = "Software",
+                    Introduction = "Fubao Company"
+                },
+                new Company
+                    {
+                        Id = Guid.Parse("8cc04f96-2c42-4f76-832e-1903835b0190"),
+                        Name = "Huawei",
+                        Country = "CN",
+                        Industry = "Communication",
+                        Product = "Hardware",
+                        Introduction = "Building a Smart World of Everything"
+                    },
+                new Company
+                    {
+                        Id = Guid.Parse("d1f1f410-f563-4355-aa91-4774d693363f"),
+                        Name = "Xiaomi",
+                        Country = "CN",
+                        Industry = "Communication",
+                        Product = "Hardware",
+                        Introduction = "Born for a fever"
+                    },
+                new Company
+                {
+                    Id = Guid.Parse("19b8d0f9-4fdf-41ab-b172-f2d5d725b6d9"),
+                    Name = "Wuliangye",
+                    Country = "CN",
+                    Industry = "Wine",
+                    Product = "Wine",
+                    Introduction = "Great Wine"
+                },
+                new Company
+                {
+                    Id = Guid.Parse("6c28b511-34f6-43b2-89f6-fa3dab77bcf9"),
+                    Name = "UNIQLO",
+                    Country = "JP",
+                    Industry = "Textile",
+                    Product = "Costume",
+                    Introduction = "Good clothes"
+                },
+                new Company
+                {
+                    Id = Guid.Parse("4ab2b4af-45ce-41b3-8aed-5447c3140330"),
+                    Name = "ZARA",
+                    Country = "ESP",
+                    Industry = "Textile",
+                    Product = "Costume",
+                    Introduction = "Stylish clothes"
+                },
+                new Company
+                {
+                    Id = Guid.Parse("cd11c117-551c-409f-80e9-c15d89fd7ca8"),
+                    Name = "Mercedes-Benz",
+                    Country = "GER",
+                    Industry = "Auto",
+                    Product = "Car",
+                    Introduction = "The best car"
+                },
+                new Company
+                {
+                    Id = Guid.Parse("a39f7877-3849-48a1-b6af-e35b90c73e6a"),
+                    Name = "BMW",
+                    Country = "GER",
+                    Industry = "Auto",
+                    Product = "Car",
+                    Introduction = "Good car"
+                },
+                new Company
+                {
+                    Id = Guid.Parse("eb8fc677-2600-4fdb-a8ef-51c006e7fc20"),
+                    Name = "Yahoo!",
+                    Country = "USA",
+                    Industry = "Internet",
+                    Product = "Software",
+                    Introduction = "An American web services provider headquartered in Sunnyvale"
                 }
             );
             modelBuilder.Entity<Employee>().HasData(

@@ -8,16 +8,20 @@ using Routine.APi.Data;
 using Routine.APi.DtoParameters;
 using Routine.APi.Entities;
 using Routine.APi.Helpers;
+using Routine.APi.Models;
 
 namespace Routine.APi.Services
 {
     public class CompanyRepository: ICompanyRepository
     {
         private readonly RoutineDbContext _context;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public CompanyRepository(RoutineDbContext context)
+        public CompanyRepository(RoutineDbContext context, IPropertyMappingService propertyMappingService)
         {
-            _context = context ?? throw new AbandonedMutexException(nameof(context));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _propertyMappingService = propertyMappingService ??
+                                      throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         public void AddCompany(Company company)
@@ -111,6 +115,11 @@ namespace Routine.APi.Services
                                                              || x.Introduction.Contains(parameters.SearchTerm));
             }
 
+            if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
+            {
+                var mappingDictionary = _propertyMappingService.GetPropertyMapping<CompanyDto, Company>();
+                queryExpression = queryExpression.ApplySort(parameters.OrderBy, mappingDictionary);
+            }
             //return await queryExpression.Skip((parameters.PageNumber - 1) * parameters.PageSize)
             //    .Take(parameters.PageSize)
             //    .ToListAsync();
@@ -150,34 +159,37 @@ namespace Routine.APi.Services
         }
 
         public async Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId,
-            string genderDisplay, string q)
+            EmployeeDtoParameters parameters)
         {
             if (companyId == Guid.Empty)
             {
                 throw new ArgumentNullException(nameof(companyId));
             }
 
-            var items = _context.Employees.Where(x => x.CompanyId == companyId);
-            if (!string.IsNullOrWhiteSpace(genderDisplay))
+            var queryExpression = _context.Employees.Where(x => x.CompanyId == companyId);
+
+            if (!string.IsNullOrWhiteSpace(parameters.Gender))
             {
-                genderDisplay = genderDisplay.Trim();
-                var gender = Enum.Parse<Gender>(genderDisplay);
-                items = items.Where(x => x.Gender == gender);
+                parameters.Gender = parameters.Gender.Trim();
+                var gender = Enum.Parse<Gender>(parameters.Gender);
+                queryExpression = queryExpression.Where(x => x.Gender == gender);
             }
 
-            if (!string.IsNullOrWhiteSpace(q))
+            if (!string.IsNullOrWhiteSpace(parameters.Q))
             {
-                q = q.Trim();
-                items = items.Where(x => x.EmployeeNo.Contains(q)
-                                         || x.FirstName.Contains(q)
-                                         || x.LastName.Contains(q));
+                parameters.Q = parameters.Q.Trim();
+                queryExpression = queryExpression.Where(x => x.EmployeeNo.Contains(parameters.Q)
+                                                             || x.FirstName.Contains(parameters.Q)
+                                                             || x.LastName.Contains(parameters.Q));
             }
 
-            return await items.OrderBy(x => x.EmployeeNo).ToListAsync();
-            //return await _context.Employees
-            //    .Where(x => x.CompanyId == companyId)
-            //    .OrderBy(x => x.EmployeeNo)
-            //    .ToListAsync();
+            if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
+            {
+                var mappingDictionary = _propertyMappingService.GetPropertyMapping<EmployeeDto, Employee>();
+                queryExpression = queryExpression.ApplySort(parameters.OrderBy, mappingDictionary);
+            }
+
+            return await queryExpression.ToListAsync();
         }
 
         public void UpdateCompany(Company company)

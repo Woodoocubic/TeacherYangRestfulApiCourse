@@ -18,7 +18,9 @@ namespace Routine.APi.Services
         void UpdateCompany(Company company);
         void DeleteCompany(Company company);
         Task<bool> CompanyExistAsync(Guid companyId);
-        Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId, string genderDisplay, string q);
+        
+        //need update order func
+        Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId, EmployeeDtoParameters parameters);
         Task<Employee> GetEmployeeAsync(Guid companyId, Guid employeeId);
         void AddEmployee(Guid companyId, Employee employee);
         void UpdateEmployee(Employee employee);

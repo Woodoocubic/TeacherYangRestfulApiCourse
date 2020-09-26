@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Routine.APi.Services;
 
 namespace Routine.APi.DtoParameters
 {
@@ -11,6 +12,8 @@ namespace Routine.APi.DtoParameters
         public string CompanyName { get; set; }
         public string SearchTerm { get; set; }
         public int PageNumber { get; set; } = 1; // by default is 1
+        public string OrderBy { get; set; } = "Name";
+        public string Fields { get; set; }
         private int _pageSize = 5;
 
         public int PageSize

@@ -64,12 +64,20 @@ namespace Routine.APi.Controllers
          */
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
-
-        public CompaniesController(ICompanyRepository companyRepository, IMapper mapper)
+        private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _propertyCheckerService;
+        public CompaniesController(ICompanyRepository companyRepository, 
+            IMapper mapper, 
+            IPropertyMappingService propertyMappingService,
+            IPropertyCheckerService propertyCheckerService)
         {
             _companyRepository = companyRepository
                                  ?? throw new ArgumentNullException(nameof(companyRepository));
-            _mapper = mapper ?? throw new ArgumentOutOfRangeException(nameof(mapper));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _propertyMappingService = propertyMappingService
+                                      ?? throw new ArgumentNullException(nameof(propertyMappingService));
+            _propertyCheckerService = propertyCheckerService
+                                      ?? throw new ArgumentNullException(nameof(propertyCheckerService));
         }
 
         [HttpGet(Name = nameof(GetCompanies))]
@@ -77,6 +85,16 @@ namespace Routine.APi.Controllers
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyDtoParameters parameters)
         //public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies()
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<CompanyDto, Company>(parameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_propertyCheckerService.TypeHasProperties<CompanyDto>(parameters.Fields))
+            {
+                return BadRequest();
+            }
+
             var companies = 
                 await _companyRepository.GetCompaniesAsync(parameters);
 
@@ -104,33 +122,27 @@ namespace Routine.APi.Controllers
                 {
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
                 }));
-                
+            
             var companyDtos = _mapper.Map<IEnumerable<CompanyDto>>(companies);
             
-            return Ok(companyDtos);
+            return Ok(companyDtos.ShapeData(parameters.Fields));
         }
-
+         
         [HttpGet("{companyId}", Name = nameof(GetCompany))] //or [Route("{companyId}")] api/Companies/{companyId}
-        public async Task<IActionResult> GetCompany(Guid companyId)
+        public async Task<IActionResult> GetCompany(Guid companyId, string fields)
         {
-            //not good for high 并发
-            //var exist = await _companyRepository.CompanyExistAsync(companyId);
-            //if (!exist)
-            //{
-            //    return NotFound();
-            //}
+            if (!_propertyCheckerService.TypeHasProperties<CompanyDto>(fields))
+            {
+                return BadRequest();
+            }
 
-            //var company
-            //    = await _companyRepository.GetCompanyAsync(companyId);
-            //return Ok(company);
-            // few better than above
             var company = await _companyRepository.GetCompanyAsync(companyId);
             if (company == null)
             {
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<CompanyDto>(company));
+            return Ok(_mapper.Map<CompanyDto>(company).shapeData(fields));
         }
         
         //Task<IActionResult> = Task<ActionResult<CompanyDto>>
@@ -163,7 +175,7 @@ namespace Routine.APi.Controllers
                 return NotFound();
             }
 
-            await _companyRepository.GetEmployeesAsync(companyId, null, null);
+            await _companyRepository.GetEmployeesAsync(companyId, new EmployeeDtoParameters());
             
             _companyRepository.DeleteCompany(companyEntity);
             await _companyRepository.SaveAsync();
@@ -188,6 +200,8 @@ namespace Routine.APi.Controllers
                         nameof(GetCompanies),
                         new
                         {
+                             fields = parameters.Fields,
+                             orderBy = parameters.OrderBy,
                              pageNumber = parameters.PageNumber-1,
                              pageSize = parameters.PageSize,
                              companyName = parameters.CompanyName,
@@ -198,6 +212,7 @@ namespace Routine.APi.Controllers
                         nameof(GetCompanies),
                         new
                         {
+                            fields = parameters.Fields,
                             pageNumber = parameters.PageNumber+1,
                             pageSize = parameters.PageSize,
                             companyName = parameters.CompanyName,
@@ -207,6 +222,7 @@ namespace Routine.APi.Controllers
                     return Url.Link(nameof(GetCompanies),
                         new
                         {
+                            fields = parameters.Fields,
                             pageNumber = parameters.PageNumber,
                             pageSize = parameters.PageSize,
                             companyName = parameters.CompanyName,
